@@ -1,0 +1,32 @@
+enabled: true
+
+worlds:
+  - "minecraft:overworld"
+
+chance: 0.5
+
+attempts: 1
+
+min_y: -65
+max_y: 320
+
+offset_y: 1
+
+prevent_overlap: true
+
+rotation: "RANDOM"
+
+mirror: "NONE"
+
+allowed_ground:
+  - "minecraft:grass_block"
+  - "minecraft:dirt"
+  - "minecraft:podzol"
+
+biomes:
+  minecraft:dark_forest:
+    chance: 1.0
+  minecraft:swamp:
+    chance: 0.1
+    min_y: 60
+    max_y: 80

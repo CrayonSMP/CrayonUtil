@@ -1,0 +1,43 @@
+# =====================================================================
+#                      Worldborder Control Configuration
+# =====================================================================
+debug: false
+# The exact date and time when the system (including the freeze phase) begins.
+# Format: DD.MM.YYYY-HH:MM (24h format)
+# Example: "04.07.2026-18:00" starts on July 4th, 2026 at 6:00 PM server time.
+# Set to "NOW" if you want the system to begin immediately when the plugin loads.
+start-date: "04.07.2026-18:00"
+
+# The initial size of the worldborder in blocks (e.g., 1000.0 = 1000x1000 blocks).
+# This size will be strictly enforced starting exactly at the 'start-date'.
+initial-size: 1000.0
+
+
+# ---------------------------------------------------------------------
+# PHASE 1: The Freeze Phase
+# ---------------------------------------------------------------------
+# How long should the worldborder stay fixed at 'initial-size' after the
+# start-date before it begins expanding for the first time?
+freeze:
+  duration: 7
+  # Supported units: DAYS, HOURS, MINUTES, SECONDS
+  unit: DAYS
+
+
+# ---------------------------------------------------------------------
+# PHASE 2: The Growth Phase
+# ---------------------------------------------------------------------
+# After the freeze phase expires: At what intervals should the border grow,
+# and by how many blocks?
+growth:
+  # The number of blocks the border expands by per interval.
+  amount: 50.0
+
+  # How often the expansion occurs (e.g., every 1 day, every 12 hours).
+  interval: 1
+  # Supported units: DAYS, HOURS, MINUTES, SECONDS
+  unit: DAYS
+
+  # Time in seconds over which the border expands smoothly (0 for instant teleport).
+  # A value of 300 will make the border slowly glide outward over 5 minutes.
+  animation-speed: 300

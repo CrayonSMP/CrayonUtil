@@ -1,0 +1,7 @@
+language: en
+
+features:
+  rainfeature: true
+  utilfeature: true
+  sludgefeature: false
+  worldgenfeature: false

@@ -1,0 +1,25 @@
+name: CrayonUtil
+version: '${project.version}'
+main: space.qouve.core.CrayonUtil
+api-version: 26.1.2
+
+authors:
+  - TamashiiMon
+description: A utility plugin for Crayon.
+
+dependencies:
+  server:
+    ParticleEngine:
+      load: BEFORE
+      required: false
+    ParticleLib:
+      load: BEFORE
+      required: false
+    CraftEngine:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    WorldEdit:
+      load: BEFORE
+      required: true
+      join-classpath: true

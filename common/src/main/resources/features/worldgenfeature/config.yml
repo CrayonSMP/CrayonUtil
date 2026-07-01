@@ -1,0 +1,5 @@
+debug: false
+
+blacklisted-blocks:
+    - minecraft:bedrock
+    - minecraft:oak_log

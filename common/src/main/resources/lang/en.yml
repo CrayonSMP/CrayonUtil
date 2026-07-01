@@ -1,0 +1,27 @@
+#The language file of en.
+no_permission: "<red>You don't have permission to use this command.</red>"
+
+feature:
+  not_found: '<red>The feature "{id}" does not exist.</red>'
+  specify_id: '<red>Please specify a feature ID.</red>'
+  header: '<gray>--------- <gold>CrayonUtil Features</gold> ---------</gray>'
+  list_prefix: '<gray>Features: </gray>'
+  enabled_permanent: '<green>Feature "{id}" has been permanently enabled in the config and loaded!</green>'
+  enabled_already: '<yellow>Feature "{id}" is now enabled in the config (was already running).</yellow>'
+  disabled_permanent: '<red>Feature "{id}" has been permanently disabled in the config and unloaded!</red>'
+  disabled_already: '<yellow>Feature "{id}" has been disabled in the config (was not running anyway).</yellow>'
+  loaded_temporary: '<green>Feature "{id}" has been temporarily loaded for this session!</green>'
+  loaded_failed: '<red>Feature "{id}" is already running or could not be loaded.</red>'
+  unloaded_temporary: '<yellow>Feature "{id}" has been temporarily unloaded for this session!</yellow>'
+  unloaded_failed: '<red>Feature "{id}" is not currently active.</red>'
+  help:
+    header: '<gold>Available Feature Commands:</gold>'
+    list: '<yellow>/cu feature list <gray>- Shows all features and their status'
+    enable: '<yellow>/cu feature enable <id> <gray>- Permanently activates a feature'
+    disable: '<yellow>/cu feature disable <id> <gray>- Permanently deactivates a feature'
+    load: '<yellow>/cu feature load <id> <gray>- Temporarily loads a feature'
+    unload: '<yellow>/cu feature unload <id> <gray>- Temporarily unloads a feature'
+reload:
+  all: 'Reload the entire plugin.'
+  feature: 'Reload the feature: "{feature}" configuration.'
+  success: 'Reloaded successfully.'

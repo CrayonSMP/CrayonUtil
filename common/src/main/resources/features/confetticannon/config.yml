@@ -1,0 +1,36 @@
+#----------------------------------#
+#   Confetti Cannon Configuration  #
+#----------------------------------#
+debug: false
+
+# Available options:
+# MODERN or PARTICLEENGINE  -> Uses the new packet-based ParticleEngine plugin (note: this is in a experimental state and not finished yet).
+# LEGACY or PARTICLELIB     -> Uses the old ParticleLib plugin
+engine-mode: "LEGACY"
+
+# CraftEngine Compabillity, muste be tintable.
+particle-item: "minecrtft:leather_chestplate"
+
+cannon-item: "minecraft:crossbow"
+
+cooldown: 5 # 5 sek cooldown between shots.
+
+trigger-sound:
+  sound: "minecraft:block.note_block.pling"
+  pitch: 1.0
+  volume: 1.0
+
+break-sound:
+  sound: "minecraft:block.glass.break"
+  pitch: 1.0
+  volume: 1.0
+
+# You can set any base color with thier name (RED, BLUE, GREEN, AQUA, PURPLE, WHITE, BLACK, etc).
+# And you can usw hex codes (#FF0000, #00FF00, #0000FF).
+confetti-colors:
+  - "RED"
+  - "#FF5555"
+  - "AQUA"
+  - "#FFAA00"
+  - "PURPLE"
+  - "#55FF55"
