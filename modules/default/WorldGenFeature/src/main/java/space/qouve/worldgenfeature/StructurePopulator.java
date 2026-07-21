@@ -16,11 +16,13 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
 import org.bukkit.generator.BlockPopulator;
+import org.bukkit.generator.LimitedRegion;
 
 import space.qouve.core.CrayonUtil;
 import space.qouve.worldgenfeature.models.MultiPatchConfig;
@@ -55,9 +57,9 @@ public class StructurePopulator extends BlockPopulator {
         String worldName = world.getName();
         String worldKey  = world.getKey().toString();
 
-        // =====================================================================
-        // 1) Normale Strukturen
-        // =====================================================================
+// =====================================================================
+// 1) Normale Strukturen
+// =====================================================================
         List<String> names = new ArrayList<>(feature.getStructureNames());
         Collections.shuffle(names, random);
 
@@ -97,11 +99,15 @@ public class StructurePopulator extends BlockPopulator {
                         double angle    = random.nextDouble() * 2 * Math.PI;
                         int blockX = centerX + (int) (distance * Math.cos(angle));
                         int blockZ = centerZ + (int) (distance * Math.sin(angle));
-                        int blockY = random.nextInt(maxY - minY + 1) + minY;
+
+                        // Holt das ABSOLUT höchste Y der Welt
+                        int blockY = getHighestValidY(world, limitedRegion, blockX, blockZ);
+
+                        // Validierung gegen deine min/max Config-Grenzen
+                        if (blockY < minY || blockY > maxY) continue;
 
                         try {
-                            org.bukkit.Material groundType = limitedRegion.getType(blockX, blockY, blockZ);
-                            if (groundType == org.bukkit.Material.AIR) continue;
+                            Material groundType = limitedRegion.getType(blockX, blockY, blockZ);
                             String groundMat = groundType.getKey().toString();
                             List<String> allowedGround = config.getAllowedGround(biomeKey);
                             if (allowedGround != null && !allowedGround.contains(groundMat)) continue;
@@ -113,9 +119,13 @@ public class StructurePopulator extends BlockPopulator {
 
                 } else {
                     // --- NORMALE LOGIK ---
-                    int blockY = random.nextInt(maxY - minY + 1) + minY;
+                    int blockY = getHighestValidY(world, limitedRegion, centerX, centerZ);
+
+                    // Validierung gegen deine min/max Config-Grenzen
+                    if (blockY < minY || blockY > maxY) continue;
+
                     try {
-                        org.bukkit.Material groundType = limitedRegion.getType(centerX, blockY, centerZ);
+                        Material groundType = limitedRegion.getType(centerX, blockY, centerZ);
                         String groundMat = groundType.getKey().toString();
                         List<String> allowedGround = config.getAllowedGround(biomeKey);
                         if (allowedGround != null && !allowedGround.contains(groundMat)) continue;
@@ -149,9 +159,9 @@ public class StructurePopulator extends BlockPopulator {
             }
         }
 
-        // =====================================================================
-        // 2) Multi-Patches
-        // =====================================================================
+// =====================================================================
+// 2) Multi-Patches
+// =====================================================================
         List<String> patchNames = new ArrayList<>(feature.getMultiPatchNames());
         Collections.shuffle(patchNames, random);
 
@@ -196,11 +206,15 @@ public class StructurePopulator extends BlockPopulator {
                         double angle    = random.nextDouble() * 2 * Math.PI;
                         int blockX = centerX + (int) (distance * Math.cos(angle));
                         int blockZ = centerZ + (int) (distance * Math.sin(angle));
-                        int blockY = random.nextInt(maxY - minY + 1) + minY;
+
+                        // Holt das ABSOLUT höchste Y der Welt
+                        int blockY = getHighestValidY(world, limitedRegion, blockX, blockZ);
+
+                        // Validierung gegen deine min/max Config-Grenzen
+                        if (blockY < minY || blockY > maxY) continue;
 
                         try {
-                            org.bukkit.Material groundType = limitedRegion.getType(blockX, blockY, blockZ);
-                            if (groundType == org.bukkit.Material.AIR) continue;
+                            Material groundType = limitedRegion.getType(blockX, blockY, blockZ);
                             String groundMat = groundType.getKey().toString();
 
                             MultiPatchConfig.SchematicEntry entry =
@@ -219,9 +233,13 @@ public class StructurePopulator extends BlockPopulator {
 
                 } else {
                     // --- EINZELNER SPAWN ---
-                    int blockY = random.nextInt(maxY - minY + 1) + minY;
+                    int blockY = getHighestValidY(world, limitedRegion, centerX, centerZ);
+
+                    // Validierung gegen deine min/max Config-Grenzen
+                    if (blockY < minY || blockY > maxY) continue;
+
                     try {
-                        org.bukkit.Material groundType = limitedRegion.getType(centerX, blockY, centerZ);
+                        Material groundType = limitedRegion.getType(centerX, blockY, centerZ);
                         String groundMat = groundType.getKey().toString();
 
                         MultiPatchConfig.SchematicEntry entry =
@@ -273,11 +291,56 @@ public class StructurePopulator extends BlockPopulator {
         }
     }
 
+    /**
+     * Sucht von oben (maxY) nach unten (minY) nach dem ersten soliden Block,
+     * der kein Laub, Gras, Schnee oder Luft ist.
+     */
+    /**
+     * Sucht vom absoluten Maximum der Welt nach unten nach dem höchsten echten Block.
+     */
+    private int getHighestValidY(World world, LimitedRegion region, int x, int z) {
+        int worldMax = world.getMaxHeight() - 1;
+        int worldMin = world.getMinHeight();
+
+        for (int y = worldMax; y >= worldMin; y--) {
+            try {
+                Material mat = region.getType(x, y, z);
+
+                // Überspringe unvollständige, Luft- oder "Deko"-Blöcke
+                if (mat.isAir() || isIgnoredBlock(mat)) {
+                    continue;
+                }
+
+                // Der allerhöchste, valide Block der Welt an diesen X/Z Koordinaten
+                return y;
+            } catch (Exception ignored) {
+                // Falls die Koordinate außerhalb der geladenen LimitedRegion liegt
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Hilfsmethode, um zu definieren welche Materialien ignoriert werden sollen.
+     */
+    private boolean isIgnoredBlock(Material mat) {
+        String name = mat.name();
+        return name.contains("LEAVES")
+                || name.contains("GRASS")
+                || name.contains("FERN")
+                || name.contains("FLOWER")
+                || name.contains("PLANT")
+                || name.contains("VINE")
+                || mat == Material.SNOW
+                || mat == Material.MOSS_CARPET;
+    }
+
     private record SpawnRequest(Location location, MultiPatchConfig.SchematicEntry entry) {}
 
     private void placeWithWorldEdit(World world, Location location, File file,
                                     StructureRotation rotation, Mirror mirror,
                                     boolean overrideAir) throws Exception {
+        // [Der Rest deiner placeWithWorldEdit Methode bleibt exakt gleich...]
         ClipboardFormat format = ClipboardFormats.findByFile(file);
         if (format == null) throw new IllegalArgumentException("Unknown schematic format: " + file.getName());
 

@@ -59,7 +59,12 @@ public class GravityConfettiParticleEngine extends Gravity implements Configurat
     @Override
     public void applyGravity(Particle particle, int step) {
         if (grounded) {
+            // Once a piece has landed, just count down until it's time to despawn it
+            // instead of waiting out its full particleLifeTicks range.
             ticksOnGround += step;
+            if (ticksOnGround >= restingTicks) {
+                particle.remove();
+            }
             return;
         }
 

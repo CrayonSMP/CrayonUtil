@@ -1,7 +1,7 @@
 name: CrayonUtil
 version: '${project.version}'
 main: space.qouve.core.CrayonUtil
-api-version: 26.1.2
+api-version: 26.2
 
 authors:
   - TamashiiMon
