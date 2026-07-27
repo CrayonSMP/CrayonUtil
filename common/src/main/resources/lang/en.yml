@@ -25,3 +25,10 @@ reload:
   all: 'Reload the entire plugin.'
   feature: 'Reload the feature: "{feature}" configuration.'
   success: 'Reloaded successfully.'
+auto_restart:
+  notification: '<red><bold>Server restarts in %time% %unit%.</bold></red>'
+  unit:
+    minute: 'minute'
+    minutes: 'minutes'
+    second: 'second'
+    seconds: 'seconds'

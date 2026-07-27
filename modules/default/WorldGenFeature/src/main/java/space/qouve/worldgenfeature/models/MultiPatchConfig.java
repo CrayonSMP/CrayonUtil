@@ -399,4 +399,6 @@ public class MultiPatchConfig {
     public StructureConfig.PatchConfig getPatchConfig() { return patchConfig; }
     public List<SchematicEntry>        getSchematics()  { return Collections.unmodifiableList(schematics); }
     public Map<String, BiomeOverride>  getBiomeOverrides() { return Collections.unmodifiableMap(biomeOverrides); }
+
+
 }

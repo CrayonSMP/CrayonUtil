@@ -6,6 +6,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import space.qouve.core.commands.CrayonUtilCommand;
 import space.qouve.core.services.FeatureService;
 import space.qouve.core.services.LanguageService;
+import space.qouve.core.services.RestartService;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class CrayonUtil extends JavaPlugin {
         languageService = new LanguageService(getConfig().getString("language", "en"), this);
         featureService = new FeatureService(this);
         featureService.discoverAndLoadFeatures();
+        new RestartService(this, languageService, getConfig());
 
         final CrayonUtilCommand executor = new CrayonUtilCommand(this);
 
