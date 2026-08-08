@@ -4,10 +4,6 @@ structures:
     chance: 75.0
     rotation: "RANDOM"
     override-air: false
-    blocks:
-      - STONE
-      - DIRT
-      - GRASS_BLOCK
     behaviors:
       - coolbehavior:
           coolness: 10
@@ -16,3 +12,4 @@ structures:
           radius: 32
       - ground_allowed:
           allow-water: false
+      - water-place:
