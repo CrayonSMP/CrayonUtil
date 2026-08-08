@@ -13,9 +13,6 @@ import space.qouve.worldgenfeature.WorldGenFeature;
 
 import java.io.File;
 
-/**
- * Holds all data needed for a single WorldEdit placement (structures and multi-patches).
- */
 public record WorldGenContext(
         World world,
         Clipboard clipboard,
@@ -25,30 +22,33 @@ public record WorldGenContext(
         Mirror mirror,
         boolean overrideAir,
         String debugName,
-        WorldGenFeature feature
+        WorldGenFeature feature,
+        boolean isPatch
 ) {
 
-    // Creates the context before the clipboard is loaded.
     public static WorldGenContext of(World world, Location location, File file,
                                      StructureRotation rotation, Mirror mirror,
                                      boolean overrideAir, String debugName,
                                      WorldGenFeature feature) {
         return new WorldGenContext(world, null, file, location, rotation, mirror,
-                overrideAir, debugName, feature);
+                overrideAir, debugName, feature, false); // Standardmäßig kein Patch
     }
 
-    // Returns a copy with the clipboard set.
     public WorldGenContext withClipboard(Clipboard clipboard) {
         return new WorldGenContext(world, clipboard, file, location, rotation, mirror,
-                overrideAir, debugName, feature);
+                overrideAir, debugName, feature, isPatch);
     }
 
-    // Target position as BlockVector3.
+    // Neu: Methode zum Setzen des Patch-Status
+    public WorldGenContext withIsPatch(boolean isPatch) {
+        return new WorldGenContext(world, clipboard, file, location, rotation, mirror,
+                overrideAir, debugName, feature, isPatch);
+    }
+
     public BlockVector3 toBlockVector3() {
         return BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
-    // Builds the transform from rotation + mirror.
     public AffineTransform buildTransform() {
         AffineTransform transform = new AffineTransform();
         switch (rotation) {

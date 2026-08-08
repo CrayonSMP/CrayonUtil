@@ -13,6 +13,7 @@ import space.qouve.core.models.FeatureProvider;
 import space.qouve.worldgenfeature.models.WorldGenBehaviors;
 import space.qouve.worldgenfeature.models.WorldGenStructure;
 import space.qouve.worldgenfeature.services.WorldGenService;
+import space.qouve.worldgenfeature.utils.StructureSpawnQueue;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,8 @@ public class WorldGenFeature extends Feature {
     private YamlConfiguration config;
     private WorldGenService worldGenService;
     private StructurePopulator populator;
+    private StructureSpawnQueue spawnQueue;
+    private org.bukkit.scheduler.BukkitTask spawnQueuePurgeTask;
 
     public WorldGenFeature(CrayonUtil plugin) {
         super("worldgenfeature", FeatureCategorry.DEFAULT, "WorldGen", plugin);
@@ -32,6 +35,8 @@ public class WorldGenFeature extends Feature {
     @Override
     public void onEnable() throws IOException {
         instance = this;
+
+        long startTime = System.currentTimeMillis();
 
         saveConfig();
         reloadConfig();
@@ -44,14 +49,35 @@ public class WorldGenFeature extends Feature {
 
         ConfigurationSection featureConfig = config;
 
-        populator = new StructurePopulator(this, worldGenService.getStructures().values().stream().toList());
-        WorldGenListener regListener = new WorldGenListener(this, featureConfig, populator);
+        spawnQueue = new StructureSpawnQueue();
+
+        populator = new StructurePopulator(this, worldGenService.getStructures().values().stream().toList(), spawnQueue);
+        WorldGenListener regListener = new WorldGenListener(this, featureConfig, populator, spawnQueue);
         registerListeners(getId(), List.of(regListener));
+
+        // Verwaiste Spawn-Queue-Einträge (Chunks, die generiert wurden aber nie ein
+        // reguläres ChunkLoadEvent mit isNewChunk()==true bekommen haben, z. B. durch
+        // Pregeneration-Tools) periodisch aufräumen, damit die Queue nicht unbegrenzt
+        // wächst und über Zeit GC-Druck/TPS-Einbrüche verursacht.
+        spawnQueuePurgeTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
+            int purged = spawnQueue.purgeStale();
+            if (purged > 0) {
+                debug("Purged " + purged + " stale StructureSpawnQueue entr" + (purged == 1 ? "y" : "ies")
+                        + " (never received a matching ChunkLoadEvent). Current queue size: " + spawnQueue.size());
+            }
+        }, 20L * 60L, 20L * 60L); // erstmals nach 1 Minute, danach jede Minute
+
+        debug("WorldGenFeature enabled in " + (System.currentTimeMillis() - startTime) + " ms.");
 
     }
 
     @Override
     public void onDisable() {
+        if (spawnQueuePurgeTask != null) {
+            spawnQueuePurgeTask.cancel();
+            spawnQueuePurgeTask = null;
+        }
+
         worldGenService.unLoad();
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().remove(populator);
@@ -65,6 +91,7 @@ public class WorldGenFeature extends Feature {
         worldGenService.reload();
     }
 
+    public WorldGenService genService() { return worldGenService; }
     public static WorldGenFeature getFeature()                    { return instance; }
     public YamlConfiguration getFeatureConfig() { return config; }
 

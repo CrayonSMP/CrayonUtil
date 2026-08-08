@@ -10,12 +10,11 @@ import space.qouve.worldgenfeature.utils.WorldGenUtil;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Loads all structure configs from the "configurations" folder (including
- * arbitrarily nested sub-folders), merges their "structures" sections into a
- * single temporary section, and builds the resulting {@link WorldGenStructure}
- * instances from it.
+ * Lädt alle Struktur-Konfigurationen einmalig beim Start und hält sie im Speicher gecacht,
+ * um jegliche Festplattenzugriffe zur Laufzeit (oder während des Chunk-Generierens) zu verhindern.
  */
 public final class WorldGenService {
 
@@ -25,7 +24,11 @@ public final class WorldGenService {
     private final WorldGenFeature feature;
     private final File dataFolder;
 
-    private final Map<String, WorldGenStructure> structures = new LinkedHashMap<>();
+    // Thread-sicherer Cache für alle geladenen Strukturen
+    private final Map<String, WorldGenStructure> structures = new ConcurrentHashMap<>();
+
+    // Cache für bereits eingelesene Yaml-Dateien, falls man sie separat cachen möchte
+    private boolean isLoaded = false;
 
     public WorldGenService(WorldGenFeature feature, File dataFolder) {
         this.feature = feature;
@@ -33,9 +36,13 @@ public final class WorldGenService {
     }
 
     /**
-     * Loads (or reloads) all structures. Safe to call multiple times.
+     * Lädt alle Strukturen einmalig von der Festplatte und cacht sie im Arbeitsspeicher.
      */
-    public void load() {
+    public synchronized void load() {
+        if (isLoaded && !structures.isEmpty()) {
+            return; // Verhindert mehrfaches unnötiges Laden
+        }
+
         structures.clear();
 
         File configurationsFolder = new File(dataFolder, CONFIG_FOLDER_NAME);
@@ -55,18 +62,16 @@ public final class WorldGenService {
         ConfigurationSection mergedStructures = mergeStructureSections(ymlFiles);
         loadStructuresFromSection(mergedStructures);
 
-        feature.debug("Loaded " + structures.size() + " structure(s) from " + ymlFiles.size() + " config file(s).");
+        isLoaded = true;
+        feature.debug("Successfully loaded and cached " + structures.size() + " structure(s) from " + ymlFiles.size() + " config file(s).");
     }
 
-    public void unLoad() {
+    public synchronized void unLoad() {
         feature.debug("Unloading " + structures.size() + " structure(s).");
         structures.clear();
+        isLoaded = false;
     }
 
-    /**
-     * Reads the "structures" section out of every given file and merges all
-     * entries into a single, in-memory section.
-     */
     private ConfigurationSection mergeStructureSections(List<File> ymlFiles) {
         ConfigurationSection merged = new YamlConfiguration().createSection(STRUCTURES_KEY);
 
@@ -77,14 +82,7 @@ public final class WorldGenService {
 
             for (String key : structuresSection.getKeys(false)) {
                 ConfigurationSection keySection = structuresSection.getConfigurationSection(key);
-                if (keySection == null) {
-                    feature.debug("Structure '" + key + "' in " + file.getPath() + " is not a section, skipping.");
-                    continue;
-                }
-
-                if (merged.contains(key)) {
-                    feature.debug("Duplicate structure key '" + key + "' (last seen in " + file.getPath() + "), overwriting previous definition.");
-                }
+                if (keySection == null) continue;
 
                 copySection(keySection, merged.createSection(key));
             }
@@ -93,19 +91,12 @@ public final class WorldGenService {
         return merged;
     }
 
-    /**
-     * Builds a {@link WorldGenConfig} and {@link WorldGenStructure} for every
-     * key in the merged section and stores it.
-     */
     private void loadStructuresFromSection(ConfigurationSection mergedStructures) {
         for (String key : mergedStructures.getKeys(false)) {
             ConfigurationSection section = mergedStructures.getConfigurationSection(key);
             if (section == null) continue;
 
             try {
-                // WorldGenUtil.loadConfig resolves the path as
-                // new File(dataFolder, "schematics/" + file), so a value like
-                // "meow/my_structure.schem" resolves into a sub-folder automatically.
                 WorldGenConfig config = WorldGenUtil.loadConfig(key, section, dataFolder);
                 WorldGenStructure structure = new WorldGenStructure(config, section);
                 structures.put(key, structure);
@@ -115,9 +106,6 @@ public final class WorldGenService {
         }
     }
 
-    /**
-     * Recursively collects every .yml/.yaml file, no matter how deeply nested.
-     */
     private void collectYamlFiles(File folder, List<File> out) {
         File[] files = folder.listFiles();
         if (files == null) return;
@@ -136,9 +124,6 @@ public final class WorldGenService {
         return lower.endsWith(".yml") || lower.endsWith(".yaml");
     }
 
-    /**
-     * Recursively copies a section (including nested sub-sections) into another.
-     */
     private void copySection(ConfigurationSection from, ConfigurationSection to) {
         for (String key : from.getKeys(false)) {
             Object value = from.get(key);
@@ -150,10 +135,6 @@ public final class WorldGenService {
         }
     }
 
-    // -------------------------------------------------------------------
-    // Access
-    // -------------------------------------------------------------------
-
     public Map<String, WorldGenStructure> getStructures() {
         return Collections.unmodifiableMap(structures);
     }
@@ -162,7 +143,8 @@ public final class WorldGenService {
         return structures.get(key);
     }
 
-    public void reload() {
+    public synchronized void reload() {
+        isLoaded = false;
         load();
     }
 }
