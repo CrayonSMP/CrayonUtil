@@ -1,0 +1,18 @@
+structures:
+  mycoolstructure1:
+    file: "my_structure.schem"
+    chance: 75.0
+    rotation: "RANDOM"
+    override-air: false
+    blocks:
+      - STONE
+      - DIRT
+      - GRASS_BLOCK
+    behaviors:
+      - coolbehavior:
+          coolness: 10
+          meow: 8
+      - min_distance:
+          radius: 32
+      - ground_allowed:
+          allow-water: false
