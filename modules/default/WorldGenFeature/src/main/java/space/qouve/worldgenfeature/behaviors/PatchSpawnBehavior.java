@@ -13,8 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class PatchSpawnBehavior extends WorldGenBehavior {
 
-    // Defensive Obergrenze: verhindert, dass eine falsch konfigurierte "count" (z. B.
-    // versehentlich 500 statt 5) beliebig viele Deferred-Tasks pro Struktur-Spawn erzeugt.
     private static final int MAX_COUNT = 32;
 
     public PatchSpawnBehavior() {
@@ -34,15 +32,6 @@ public class PatchSpawnBehavior extends WorldGenBehavior {
 
         World world = context.world();
 
-        // WICHTIG: Die einzelnen Patches NICHT mehr synchron in dieser Schleife
-        // abarbeiten. Vorher liefen hier bis zu "count" volle runBehaviors() +
-        // placeWithWorldEdit()-Aufrufe direkt hintereinander im selben Tick, in dem der
-        // Chunk geladen wurde - ungedrosselt, unabhängig von der Placement-Queue in
-        // WorldEditUtil. Bei mehreren gleichzeitig ladenden Chunks mit patch-fähigen
-        // Strukturen summierte sich das im selben Tick auf und verursachte spürbare
-        // TPS-Spikes. Jetzt läuft jede Patch-Iteration selbst über
-        // WorldEditUtil.scheduleDeferred() - also über dieselbe pro Tick begrenzte Queue
-        // wie die eigentlichen Placements.
         for (int i = 0; i < count; i++) {
             WorldEditUtil.scheduleDeferred(() -> spawnSinglePatch(context, world, radius, patchStructureKeys));
         }
@@ -62,12 +51,11 @@ public class PatchSpawnBehavior extends WorldGenBehavior {
         int chunkX = blockX >> 4;
         int chunkZ = blockZ >> 4;
 
-        // Verhindert das teure, synchrone Nachladen/Generieren von Chunks mitten im Patch-Spawn
         if (!world.isChunkLoaded(chunkX, chunkZ)) {
             return;
         }
 
-        targetLoc.setY(world.getHighestBlockYAt(blockX, blockZ));
+        targetLoc.setY(randomY(world));
 
         String chosenKey = patchStructureKeys.get(random.nextInt(patchStructureKeys.size()));
         WorldGenStructure subStructure = context.feature().genService().getStructure(chosenKey);
@@ -87,5 +75,11 @@ public class PatchSpawnBehavior extends WorldGenBehavior {
         if (subStructure.runBehaviors(patchContext)) {
             WorldEditUtil.placeWithWorldEdit(patchContext);
         }
+    }
+
+    private int randomY(World world) {
+        int minY = world.getMinHeight();
+        int maxY = world.getMaxHeight() - 1;
+        return minY + ThreadLocalRandom.current().nextInt(maxY - minY + 1);
     }
 }

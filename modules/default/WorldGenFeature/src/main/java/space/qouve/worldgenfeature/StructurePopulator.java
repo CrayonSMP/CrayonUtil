@@ -1,7 +1,6 @@
 package space.qouve.worldgenfeature;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.LimitedRegion;
@@ -63,13 +62,9 @@ public class StructurePopulator extends BlockPopulator {
                     continue;
                 }
 
-                // Performante, optimierte Höhensuche statt blindem Loop von ganz oben
-                int groundY = findHighestValidYOptimized(worldInfo, limitedRegion, worldX, worldZ);
-                if (groundY == -1) {
-                    continue;
-                }
+                int spawnY = randomY(worldInfo, random);
 
-                candidates.add(new PendingSpawn(structure, worldX, groundY, worldZ, biomeConfig.overrideAir()));
+                candidates.add(new PendingSpawn(structure, worldX, spawnY, worldZ, biomeConfig.overrideAir()));
 
             } catch (Exception e) {
                 Bukkit.getLogger().log(Level.SEVERE, "[WorldGenFeature] Fehler beim Vorbereiten der Struktur in Chunk ("
@@ -86,34 +81,9 @@ public class StructurePopulator extends BlockPopulator {
         spawnQueue.queue(key, candidates);
     }
 
-    /**
-     * Stark beschleunigte Höhensuche: Startet in einer typischen Region (z. B. Y=100 oder Max-Höhe)
-     * und prüft effizient, vermeidet das komplette Durchkämmen von 300+ Blöcken, wenn nicht nötig.
-     */
-    private int findHighestValidYOptimized(WorldInfo worldInfo, LimitedRegion region, int x, int z) {
-        int maxY = Math.min(120, worldInfo.getMaxHeight() - 1); // Startet meist direkt über normalem Terrain
+    private int randomY(WorldInfo worldInfo, Random random) {
         int minY = worldInfo.getMinHeight();
-
-        try {
-            // Erst von Y=120 nach unten suchen, ob da direkt fester Boden ist
-            for (int y = maxY; y >= minY; y--) {
-                Material mat = region.getType(x, y, z);
-                if (!mat.isAir()) {
-                    return y;
-                }
-            }
-
-            // Falls das Terrain höher liegt (z. B. in Bergen), einmalig von ganz oben nach Y=120 scannen
-            for (int y = worldInfo.getMaxHeight() - 1; y > maxY; y--) {
-                Material mat = region.getType(x, y, z);
-                if (!mat.isAir()) {
-                    return y;
-                }
-            }
-        } catch (Exception ignored) {
-            return -1;
-        }
-
-        return -1;
+        int maxY = worldInfo.getMaxHeight() - 1;
+        return minY + random.nextInt(maxY - minY + 1);
     }
 }

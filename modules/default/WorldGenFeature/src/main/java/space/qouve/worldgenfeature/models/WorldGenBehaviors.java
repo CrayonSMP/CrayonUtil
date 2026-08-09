@@ -1,9 +1,6 @@
 package space.qouve.worldgenfeature.models;
 
-import space.qouve.worldgenfeature.behaviors.GroundBlockBehavior;
-import space.qouve.worldgenfeature.behaviors.HeightBehavior;
-import space.qouve.worldgenfeature.behaviors.HighestBlockBehavior;
-import space.qouve.worldgenfeature.behaviors.PatchSpawnBehavior;
+import space.qouve.worldgenfeature.behaviors.*;
 
 public final class WorldGenBehaviors {
 
@@ -14,5 +11,6 @@ public final class WorldGenBehaviors {
         new HighestBlockBehavior();
         new HeightBehavior();
         new GroundBlockBehavior();
+        new ExtendToGroundBehavior();
     }
 }

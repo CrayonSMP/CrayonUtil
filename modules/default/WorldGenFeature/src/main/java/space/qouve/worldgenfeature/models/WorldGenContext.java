@@ -12,6 +12,7 @@ import org.bukkit.block.structure.StructureRotation;
 import space.qouve.worldgenfeature.WorldGenFeature;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public record WorldGenContext(
         World world,
@@ -23,7 +24,8 @@ public record WorldGenContext(
         boolean overrideAir,
         String debugName,
         WorldGenFeature feature,
-        boolean isPatch
+        boolean isPatch,
+        AtomicBoolean yResolved
 ) {
 
     public static WorldGenContext of(World world, Location location, File file,
@@ -31,18 +33,17 @@ public record WorldGenContext(
                                      boolean overrideAir, String debugName,
                                      WorldGenFeature feature) {
         return new WorldGenContext(world, null, file, location, rotation, mirror,
-                overrideAir, debugName, feature, false); // Standardmäßig kein Patch
+                overrideAir, debugName, feature, false, new AtomicBoolean(false)); // Standardmäßig kein Patch
     }
 
     public WorldGenContext withClipboard(Clipboard clipboard) {
         return new WorldGenContext(world, clipboard, file, location, rotation, mirror,
-                overrideAir, debugName, feature, isPatch);
+                overrideAir, debugName, feature, isPatch, yResolved);
     }
 
-    // Neu: Methode zum Setzen des Patch-Status
     public WorldGenContext withIsPatch(boolean isPatch) {
         return new WorldGenContext(world, clipboard, file, location, rotation, mirror,
-                overrideAir, debugName, feature, isPatch);
+                overrideAir, debugName, feature, isPatch, yResolved);
     }
 
     public BlockVector3 toBlockVector3() {

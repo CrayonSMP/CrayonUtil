@@ -31,6 +31,7 @@ public class HighestBlockBehavior extends WorldGenBehavior {
                 int offset = section.isInt("offset") ? section.getInt("offset") : defaultOffset;
 
                 loc.setY(highestY + offset);
+                context.yResolved().set(true);
 
             });
 
@@ -41,6 +42,7 @@ public class HighestBlockBehavior extends WorldGenBehavior {
         int offset = section.isInt("offset") ? section.getInt("offset") : defaultOffset;
 
         loc.setY(highestY + offset);
+        context.yResolved().set(true);
 
         return true;
     }

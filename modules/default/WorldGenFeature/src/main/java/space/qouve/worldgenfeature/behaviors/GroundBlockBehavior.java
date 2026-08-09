@@ -16,10 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GroundBlockBehavior extends WorldGenBehavior {
 
-    // Cache: ConfigurationSection (identitätsbasiert, gleiche Instanz pro Struktur-Config,
-    // seit WorldGenService alles einmalig beim Start lädt) -> aufgelöste Materialien.
-    // Vorher wurde section.getStringList("materials") + Material.matchMaterial(...) für
-    // JEDEN einzelnen Struktur-Spawn neu ausgeführt, obwohl sich die Liste nie ändert.
     private static final Map<ConfigurationSection, Set<Material>> RESOLVED_MATERIALS_CACHE = new ConcurrentHashMap<>();
 
     public GroundBlockBehavior() {
@@ -54,9 +50,6 @@ public class GroundBlockBehavior extends WorldGenBehavior {
                 continue;
             }
 
-            // Fallback: manche Konfigurationswerte kommen als Namespaced-Key-String rein,
-            // den matchMaterial nicht direkt auflöst - einmalig gegen alle Materialien
-            // vergleichen (nur beim ersten Auflösen dieser Section, danach gecached).
             for (Material candidate : Material.values()) {
                 if (allowed.equalsIgnoreCase(candidate.name()) || allowed.equalsIgnoreCase(candidate.getKey().toString())) {
                     resolved.add(candidate);

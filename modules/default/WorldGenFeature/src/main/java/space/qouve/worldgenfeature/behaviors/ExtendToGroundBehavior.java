@@ -42,14 +42,6 @@ public class ExtendToGroundBehavior extends WorldGenBehavior {
         BlockVector3 origin = clipboard.getOrigin();
         BlockVector3 pasteVector = BlockVector3.at(baseLoc.getBlockX(), baseLoc.getBlockY(), baseLoc.getBlockZ());
 
-        // WICHTIG: Vorher wurde nur der Origin-Chunk der Struktur geprüft, aber die
-        // Extend-Schleife unten läuft über die GESAMTE X/Z-Fläche des Schematics. Bei
-        // Strukturen, die über eine Chunk-Grenze reichen, konnte bukkitWorld.getBlockAt()
-        // in einem ungeprüften Nachbar-Chunk landen und diesen synchron auf dem Main-Thread
-        // nachladen/generieren - derselbe Effekt wie das ursprüngliche Problem in
-        // WorldEditUtil, nur hier unentdeckt. Jetzt wird der komplette X/Z-Fußabdruck der
-        // Struktur auf Chunks projiziert und VOLLSTÄNDIG geprüft, bevor irgendetwas
-        // angefasst wird.
         int worldMinX = pasteVector.x() + (minimumPoint.x() - origin.x());
         int worldMaxX = pasteVector.x() + (maximumPoint.x() - origin.x());
         int worldMinZ = pasteVector.z() + (minimumPoint.z() - origin.z());
@@ -72,8 +64,6 @@ public class ExtendToGroundBehavior extends WorldGenBehavior {
 
             int targetY = minimumPoint.y();
 
-            // List statt Set: pro (x,z) gibt es hier ohnehin höchstens einen Eintrag,
-            // Hashing bringt also keinen Vorteil, nur unnötigen Overhead.
             List<BlockVector3> bottomBlocks = new ArrayList<>();
             for (int x = minimumPoint.x(); x <= maximumPoint.x(); x++) {
                 for (int z = minimumPoint.z(); z <= maximumPoint.z(); z++) {
