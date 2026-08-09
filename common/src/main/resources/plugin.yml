@@ -1,0 +1,20 @@
+name: CrayonUtil
+version: '${project.version}'
+main: space.qouve.core.CrayonUtil
+api-version: '1.20'
+authors:
+  - TamashiiMon
+description: A utility plugin for Crayon.
+
+depend:
+  - CraftEngine
+  - WorldEdit
+softdepend:
+  - ParticleEngine
+  - ParticleLib
+
+commands:
+  crayonutil:
+    description: A utility command for Crayon.
+    usage: /crayonutil [args]
+    aliases: [cu, crayon]
