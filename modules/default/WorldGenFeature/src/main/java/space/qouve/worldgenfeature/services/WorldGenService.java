@@ -12,10 +12,6 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Lädt alle Struktur-Konfigurationen einmalig beim Start und hält sie im Speicher gecacht,
- * um jegliche Festplattenzugriffe zur Laufzeit (oder während des Chunk-Generierens) zu verhindern.
- */
 public final class WorldGenService {
 
     private static final String CONFIG_FOLDER_NAME = "configurations";
@@ -24,10 +20,8 @@ public final class WorldGenService {
     private final WorldGenFeature feature;
     private final File dataFolder;
 
-    // Thread-sicherer Cache für alle geladenen Strukturen
     private final Map<String, WorldGenStructure> structures = new ConcurrentHashMap<>();
 
-    // Cache für bereits eingelesene Yaml-Dateien, falls man sie separat cachen möchte
     private boolean isLoaded = false;
 
     public WorldGenService(WorldGenFeature feature, File dataFolder) {
@@ -35,12 +29,9 @@ public final class WorldGenService {
         this.dataFolder = dataFolder;
     }
 
-    /**
-     * Lädt alle Strukturen einmalig von der Festplatte und cacht sie im Arbeitsspeicher.
-     */
     public synchronized void load() {
         if (isLoaded && !structures.isEmpty()) {
-            return; // Verhindert mehrfaches unnötiges Laden
+            return;
         }
 
         structures.clear();

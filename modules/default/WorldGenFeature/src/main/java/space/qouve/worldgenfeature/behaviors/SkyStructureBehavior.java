@@ -32,7 +32,6 @@ public class SkyStructureBehavior extends WorldGenBehavior {
         int cx = baseLoc.getBlockX();
         int cz = baseLoc.getBlockZ();
 
-        // Chunk-Safety-Check
         if (!bukkitWorld.isChunkLoaded(cx >> 4, cz >> 4)) {
             return false;
         }
@@ -70,7 +69,6 @@ public class SkyStructureBehavior extends WorldGenBehavior {
             baseLoc.setY(currentY);
         }
 
-        // Clearance-Radius prüfen (Schrittweite 4 bleibt erhalten für Performance)
         for (int x = -clearanceRadius; x <= clearanceRadius; x += 4) {
             for (int z = -clearanceRadius; z <= clearanceRadius; z += 4) {
                 Block sideBlock = bukkitWorld.getBlockAt(cx + x, currentY, cz + z);

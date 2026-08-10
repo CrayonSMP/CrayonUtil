@@ -43,7 +43,6 @@ public class StructurePopulator extends BlockPopulator {
                     continue;
                 }
 
-                // Erweiterten Puffer (2 bis 14) nutzen, damit Strukturen nicht in Nachbarchunks überstehen
                 int worldX = baseChunkX + 2 + random.nextInt(12);
                 int worldZ = baseChunkZ + 2 + random.nextInt(12);
                 int sampleY = 64;

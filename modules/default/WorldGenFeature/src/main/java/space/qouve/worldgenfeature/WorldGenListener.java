@@ -27,7 +27,6 @@ public class WorldGenListener implements Listener {
     public WorldGenListener(WorldGenFeature feature, ConfigurationSection configSec, StructurePopulator populator, StructureSpawnQueue queue) {
         this.feature = feature;
 
-        // Performance: Einmaliges Laden in ein HashSet (Lowercase) für O(1)-Lookups statt Stream-Suche
         List<String> rawWorlds = configSec.getStringList("allowed-worlds");
         this.allowedWorlds = new HashSet<>(rawWorlds.size());
         for (String world : rawWorlds) {
@@ -51,7 +50,6 @@ public class WorldGenListener implements Listener {
         String worldKey = world.getKey().toString().toLowerCase();
         String worldName = world.getName().toLowerCase();
 
-        // O(1) Hash-Check statt linearer Stream-Suche
         if (allowedWorlds.contains(worldKey) || allowedWorlds.contains(worldName)) {
             if (!world.getPopulators().contains(populator)) {
                 world.getPopulators().add(populator);

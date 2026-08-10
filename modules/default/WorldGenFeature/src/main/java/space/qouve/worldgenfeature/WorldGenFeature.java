@@ -10,6 +10,7 @@ import space.qouve.core.CrayonUtil;
 import space.qouve.core.models.Feature;
 import space.qouve.core.models.FeatureCategorry;
 import space.qouve.core.models.FeatureProvider;
+import space.qouve.worldgenfeature.models.WorldGenBehavior;
 import space.qouve.worldgenfeature.models.WorldGenBehaviors;
 import space.qouve.worldgenfeature.models.WorldGenStructure;
 import space.qouve.worldgenfeature.services.WorldGenService;
@@ -55,17 +56,13 @@ public class WorldGenFeature extends Feature {
         WorldGenListener regListener = new WorldGenListener(this, featureConfig, populator, spawnQueue);
         registerListeners(getId(), List.of(regListener));
 
-        // Verwaiste Spawn-Queue-Einträge (Chunks, die generiert wurden aber nie ein
-        // reguläres ChunkLoadEvent mit isNewChunk()==true bekommen haben, z. B. durch
-        // Pregeneration-Tools) periodisch aufräumen, damit die Queue nicht unbegrenzt
-        // wächst und über Zeit GC-Druck/TPS-Einbrüche verursacht.
         spawnQueuePurgeTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
             int purged = spawnQueue.purgeStale();
             if (purged > 0) {
                 debug("Purged " + purged + " stale StructureSpawnQueue entr" + (purged == 1 ? "y" : "ies")
                         + " (never received a matching ChunkLoadEvent). Current queue size: " + spawnQueue.size());
             }
-        }, 20L * 60L, 20L * 60L); // erstmals nach 1 Minute, danach jede Minute
+        }, 20L * 60L, 20L * 60L);
 
         debug("WorldGenFeature enabled in " + (System.currentTimeMillis() - startTime) + " ms.");
 
@@ -83,6 +80,8 @@ public class WorldGenFeature extends Feature {
             world.getPopulators().remove(populator);
             debug("Unregistered WorldGenPopulator for world: " + world.getName() + " (" + world.getKey().toString() + ")");
         }
+
+
 
         unregisterListeners(getId());
     }

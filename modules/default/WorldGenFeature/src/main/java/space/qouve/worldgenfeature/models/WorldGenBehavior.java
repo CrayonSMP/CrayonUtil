@@ -8,11 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Base class for a single behavior check (e.g. "min distance", "ground allowed", ...).
- * Every behavior has a unique id and is auto-registered so it can be looked up by that id
- * from configs.
- */
 public abstract class WorldGenBehavior {
 
     private static final Map<String, WorldGenBehavior> REGISTRY = new ConcurrentHashMap<>();
@@ -31,21 +26,10 @@ public abstract class WorldGenBehavior {
         return id;
     }
 
-    /**
-     * Runs the actual check. Returns true if the behavior is satisfied.
-     */
     public abstract boolean run(WorldGenContext context, ConfigurationSection section) throws IOException;
 
-    /**
-     * Optional config validation, called once when the config is loaded.
-     * Override to check for required keys / types. Default: no-op.
-     */
     public void validate(ConfigurationSection section) {
     }
-
-    // -------------------------------------------------------------------
-    // Combinators (similar to java.util.function.Predicate)
-    // -------------------------------------------------------------------
 
     public WorldGenBehavior negate() {
         WorldGenBehavior self = this;
@@ -77,10 +61,6 @@ public abstract class WorldGenBehavior {
         };
     }
 
-    // -------------------------------------------------------------------
-    // Registry access
-    // -------------------------------------------------------------------
-
     public static WorldGenBehavior byId(String id) {
         return REGISTRY.get(id);
     }
@@ -88,10 +68,6 @@ public abstract class WorldGenBehavior {
     public static Map<String, WorldGenBehavior> all() {
         return Collections.unmodifiableMap(REGISTRY);
     }
-
-    // -------------------------------------------------------------------
-    // Identity based on id
-    // -------------------------------------------------------------------
 
     @Override
     public boolean equals(Object o) {

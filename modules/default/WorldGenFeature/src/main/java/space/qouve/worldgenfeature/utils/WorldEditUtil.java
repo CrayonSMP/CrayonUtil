@@ -47,12 +47,8 @@ public final class WorldEditUtil {
 
     private static final Map<File, Clipboard> CLIPBOARD_CACHE = new ConcurrentHashMap<>();
 
-    // Performance: Vorab gecachte Blacklists pro Feature, um String-Listen-Suchen in Schleifen zu beschleunigen
     private static final Map<WorldGenFeature, Set<String>> BLACKLIST_CACHE = new ConcurrentHashMap<>();
 
-    // Eigener, begrenzter Thread-Pool statt ForkJoinPool.commonPool() zu verwenden.
-    // Blockierendes Datei-IO (Schematic laden) auf dem Common-Pool auszuführen kann
-    // Paper/Bukkit-interne Async-Tasks und andere Plugins mit ausbremsen ("Pool-Starvation").
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newFixedThreadPool(
             Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
             new ThreadFactory() {
@@ -66,15 +62,6 @@ public final class WorldEditUtil {
             }
     );
 
-    private WorldEditUtil() {
-        // Utility class
-    }
-
-    // Drosselung: statt jede fertige Platzierung sofort im nächsten Tick auszuführen,
-    // landet sie in dieser Queue. Ein Repeating-Task verarbeitet davon nur eine begrenzte
-    // Anzahl pro Tick. Ohne das können, wenn viele Chunks gleichzeitig fertig laden
-    // (z. B. schnelles Fliegen/Erkunden), mehrere volle Blacklist-Scans + WorldEdit-Copies
-    // im selben Tick landen und einen spürbaren TPS-Einbruch verursachen.
     private static final java.util.Queue<Runnable> PLACEMENT_QUEUE = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private static volatile boolean tickerStarted = false;
     private static final int MAX_PLACEMENTS_PER_TICK = 1;
@@ -94,14 +81,6 @@ public final class WorldEditUtil {
         }
     }
 
-    /**
-     * Erlaubt anderen Klassen (z. B. Behaviors wie PatchSpawnBehavior), eigene teure
-     * Main-Thread-Arbeit über dieselbe gedrosselte Queue laufen zu lassen statt sie
-     * synchron/unkontrolliert direkt auszuführen. Wichtig für alles, was selbst wieder
-     * runBehaviors()/placeWithWorldEdit() aufruft (z. B. in einer Schleife über mehrere
-     * Sub-Strukturen), da sich diese Aufrufe sonst pro Tick aufsummieren und die
-     * Main-Thread-Drosselung umgehen können.
-     */
     public static void scheduleDeferred(Runnable task) {
         ensureTickerStarted();
         PLACEMENT_QUEUE.offer(task);
@@ -135,7 +114,6 @@ public final class WorldEditUtil {
 
             org.bukkit.World world = context.world();
 
-            // 2. Chunks asynchron vorladen (nur bereits geladene/ladende Nachbarn, kein Force-Generate mehr)
             ensureChunksLoaded(world, data.bounds[0], data.bounds[1], data.bounds[2], data.bounds[3])
                     .whenComplete((v, loadError) -> {
                         if (loadError != null) {
@@ -145,8 +123,6 @@ public final class WorldEditUtil {
                             return;
                         }
 
-                        // 3. Ausführung auf dem Main Thread - gedrosselt über die Placement-Queue,
-                        // damit nicht mehrere volle Struktur-Placements im selben Tick landen
                         ensureTickerStarted();
                         PLACEMENT_QUEUE.offer(() -> {
                             try {
@@ -213,15 +189,6 @@ public final class WorldEditUtil {
                                                               int minChunkZ, int maxChunkZ) {
         List<CompletableFuture<Chunk>> futures = new ArrayList<>();
 
-        // generate=true ist hier nötig: finishPlacement() läuft auf dem Main-Thread und
-        // MUSS in Zielchunks schreiben können, die die Struktur überlappt. Wenn wir diese
-        // Chunks hier nicht async vorgenerieren, generiert Bukkit sie beim ersten
-        // Block-Zugriff in finishPlacement() (world.getBlockAt/WorldEdit-Copy) stattdessen
-        // SYNCHRON auf dem Main-Thread - das blockiert den Tick direkt und ist schlimmer
-        // als die async-Variante hier. Puffer bewusst klein (1 statt vorher 3) gehalten,
-        // damit die async-Vorgenerierung nicht unnötig viele Nachbarchunks (und damit
-        // potenziell erneut populate()/weitere Struktur-Spawns) auslöst - 1 Chunk Rand
-        // reicht für Rundungsfälle an der Bounding-Box-Grenze.
         for (int cx = minChunkX - 1; cx <= maxChunkX + 1; cx++) {
             for (int cz = minChunkZ - 1; cz <= maxChunkZ + 1; cz++) {
                 if (!world.isChunkLoaded(cx, cz)) {
