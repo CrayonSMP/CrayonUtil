@@ -29,7 +29,6 @@ public class CrayonUtil extends JavaPlugin {
         featureService.discoverAndLoadFeatures();
         new RestartService(this, languageService, getConfig());
 
-        // Befehl klassisch über die plugin.yml registrieren
         PluginCommand command = this.getCommand("crayonutil");
         if (command != null) {
             CrayonUtilCommand executor = new CrayonUtilCommand(this);

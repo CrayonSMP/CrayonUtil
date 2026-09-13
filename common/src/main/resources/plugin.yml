@@ -16,5 +16,6 @@ softdepend:
 commands:
   crayonutil:
     description: A utility command for Crayon.
+    permission: crayonutil.command
     usage: /crayonutil [args]
     aliases: [cu, crayon]

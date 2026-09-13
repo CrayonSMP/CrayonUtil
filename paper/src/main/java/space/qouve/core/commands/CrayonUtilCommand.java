@@ -35,30 +35,35 @@ public class CrayonUtilCommand implements CommandExecutor, TabCompleter {
                 SubCommandProvider provider = iterator.next();
                 SubCommand sub = provider.createInstance(plugin);
 
-                // FIX: Verhindert die NullPointerException, falls ein Provider fehlerhaft ist
+                // FIX: Prevents a NullPointerException if a provider is faulty
                 if (sub == null) {
-                    plugin.getLogger().warning("[CrayonUtil] Der Provider '" + provider.getClass().getName() + "' hat ein NULL-SubCommand geliefert!");
+                    plugin.getLogger().warning("[CrayonUtil] Provider '" + provider.getClass().getName() + "' returned a NULL SubCommand!");
                     continue;
                 }
 
                 subCommands.put(sub.getId().toLowerCase(), sub);
-                plugin.getLogger().info("[CrayonUtil] SubCommand automatisch registriert: " + sub.getId());
+                plugin.getLogger().info("[CrayonUtil] SubCommand automatically registered: " + sub.getId());
                 count++;
             } catch (Throwable t) {
-                plugin.getLogger().severe("[CrayonUtil] Kritischer Fehler beim Laden eines SubCommandProviders!");
+                plugin.getLogger().severe("[CrayonUtil] Critical error while loading a SubCommandProvider!");
                 t.printStackTrace();
             }
         }
 
         if (count == 0) {
-            plugin.getLogger().warning("[CrayonUtil] WARNUNG: Keine SubCommands via ServiceLoader gefunden!");
+            plugin.getLogger().warning("[CrayonUtil] WARNING: No SubCommands found via ServiceLoader!");
         }
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @Nullable Command cmd, @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("crayonutil.use")) {
+            sender.sendMessage("§cYou do not have permission to use this command.");
+            return true;
+        }
+
         if (args.length == 0) {
-            sender.sendMessage("§cNutze: /" + label + " <subcommand>");
+            sender.sendMessage("§cUsage: /" + label + " <subcommand>");
             return true;
         }
 
@@ -66,7 +71,7 @@ public class CrayonUtilCommand implements CommandExecutor, TabCompleter {
         SubCommand subCommand = subCommands.get(subCommandKey);
 
         if (subCommand == null) {
-            sender.sendMessage("§cBefehl nicht gefunden.");
+            sender.sendMessage("§cCommand not found.");
             return true;
         }
 
