@@ -40,11 +40,6 @@
         </dependency>
         <dependency>
             <groupId>space.qouve</groupId>
-            <artifactId>WorldGenFeature</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>space.qouve</groupId>
             <artifactId>WorldBorderManager</artifactId>
             <version>${project.version}</version>
         </dependency>

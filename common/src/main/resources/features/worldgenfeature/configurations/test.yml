@@ -1,0 +1,51 @@
+structures:
+  my_main_castle:
+    file: "castle.schem"
+    enabled: true
+    chance: 5.0
+    rotation: "RANDOM"
+    override-air: false
+    biomes:
+      - "minecraft:plains"
+      - "minecraft:savanna"
+    behaviors:
+      - highest-block:
+          offset: 0
+    biome-behaviors:
+      minecraft:plains:
+        chance: 12.0
+        override-air: false
+        behaviors:
+          - highest-block:
+              offset: 0
+          - patch-spawn:
+              count: 2
+              radius: 32.0
+              structures:
+                - "my_main_castle"
+                - "my_small_tent"
+      minecraft:savanna:
+        chance: 2.0
+
+  my_small_tent:
+    file: "tent.schem"
+    enabled: false
+    chance: 100.0
+    rotation: "RANDOM"
+    behaviors:
+      - highest-block:
+          offset: 1
+
+  my_cave_ruin:
+    file: "cave_ruin.schem"
+    enabled: true
+    chance: 15.0
+    rotation: "NONE"
+    override-air: true
+    biomes:
+      - "minecraft:stony_peaks"
+      - "minecraft:dripstone_caves"
+    behaviors:
+      - height:
+          min: -64
+          max: 10

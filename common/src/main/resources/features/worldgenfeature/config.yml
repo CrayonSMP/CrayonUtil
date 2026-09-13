@@ -1,5 +1,5 @@
 debug: false
 
-blacklisted-blocks:
-    - minecraft:bedrock
-    - minecraft:oak_log
+allowed-worlds:
+    - "minecraft:overworld"
+    - "qouve:template"

@@ -22,7 +22,6 @@
         <module>modules/default/ConfettiCannon</module>
         <module>bundle</module>
         <module>modules/default/WorldBorderManager</module>
-        <module>modules/default/WorldGenFeature</module>
     </modules>
 
     <repositories>
