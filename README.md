@@ -1,7 +1,7 @@
 # CrayonUtil 🖍️
 
 [![Plugin Phase](https://img.shields.io/badge/Phase-In__Development-orange?style=for-the-badge)](https://github.com/)
-[![Server Version](https://img.shields.io/badge/Minecraft-1.21.x-brightgreen?style=for-the-badge)](https://papermc.io)
+[![Server Version](https://img.shields.io/badge/Minecraft-26.2.x-brightgreen?style=for-the-badge)](https://papermc.io)
 
 **CrayonUtil** is the official core utility plugin for **CrayonSMP 3**. 
 
