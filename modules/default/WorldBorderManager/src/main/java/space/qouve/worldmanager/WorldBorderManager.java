@@ -6,7 +6,10 @@ import space.qouve.core.CrayonUtil;
 import space.qouve.core.models.Feature;
 import space.qouve.core.models.FeatureCategorry;
 import space.qouve.core.models.FeatureProvider;
+import space.qouve.worldmanager.listeners.PlayerFirstJoinListener;
 import space.qouve.worldmanager.services.BorderManager;
+
+import java.util.List;
 
 public class WorldBorderManager extends Feature {
 
@@ -23,12 +26,16 @@ public class WorldBorderManager extends Feature {
         config = getConfig();
 
         BorderManager borderManager = new BorderManager(this);
+
+        registerListeners("worldbordermanager", List.of(new PlayerFirstJoinListener(borderManager)));
     }
 
     @Override
     public void onDisable() {
         instance = null;
         config = null;
+
+        unregisterListeners("worldbordermanager");
     }
 
     @Override

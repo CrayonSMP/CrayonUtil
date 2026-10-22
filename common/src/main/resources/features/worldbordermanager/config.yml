@@ -12,6 +12,8 @@ start-date: "04.07.2026-18:00"
 # This size will be strictly enforced starting exactly at the 'start-date'.
 initial-size: 1000.0
 
+items-on-start-date:
+  - "minecraft:crossbow"
 
 # ---------------------------------------------------------------------
 # PHASE 1: The Freeze Phase

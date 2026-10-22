@@ -16,7 +16,6 @@
     </properties>
 
     <modules>
-        <module>api</module>
         <module>common</module>
         <module>paper</module>
         <module>modules/default/ConfettiCannon</module>

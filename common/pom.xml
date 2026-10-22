@@ -13,11 +13,4 @@
 
     <artifactId>common</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>space.qouve</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>
