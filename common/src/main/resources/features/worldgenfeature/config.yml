@@ -1,5 +1,0 @@
-debug: false
-
-allowed-worlds:
-    - "minecraft:overworld"
-    - "qouve:template"

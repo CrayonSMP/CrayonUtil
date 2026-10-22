@@ -8,6 +8,7 @@ import space.qouve.worldmanager.WorldBorderManager;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class BorderManager {
@@ -25,6 +26,8 @@ public class BorderManager {
     private ChronoUnit growthUnit;
     private long animationSpeed;
 
+    private List<String> startItemKeys;
+
     private WorldBorderManager feature;
 
     public BorderManager(WorldBorderManager feature) {
@@ -41,6 +44,8 @@ public class BorderManager {
 
         String startDateStr = config.getString("start-date", "NOW");
         this.startDate = parseStartDate(startDateStr, logger);
+
+        this.startItemKeys = config.getStringList("items-on-start-date");
 
         this.freezeDuration = config.getLong("freeze.duration", 7);
         this.freezeUnit = parseChronoUnit(config.getString("freeze.unit", "DAYS"), ChronoUnit.DAYS, logger);
@@ -155,4 +160,5 @@ public class BorderManager {
     public long getGrowthInterval() { return growthInterval; }
     public ChronoUnit getGrowthUnit() { return growthUnit; }
     public long getAnimationSpeed() { return animationSpeed; }
+    public List<String> getStartItemKeys() { return startItemKeys; }
 }

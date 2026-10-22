@@ -16,11 +16,6 @@
     <dependencies>
         <dependency>
             <groupId>space.qouve</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>space.qouve</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
