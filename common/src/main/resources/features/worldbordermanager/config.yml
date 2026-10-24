@@ -15,6 +15,16 @@ initial-size: 1000.0
 items-on-start-date:
   - "minecraft:crossbow"
 
+# {time} are minutes or seconds, {unit} are the unit like "minutes", "minute", "seconds", "second"
+start-countdown:
+  message: "CrayonSMP starts in {time} {unit}!"
+  start-message: "CrayonSMP has started!"
+  units:
+    minutes: "minutes"
+    minute: "minute"
+    seconds: "seconds"
+    second: "second"
+
 # ---------------------------------------------------------------------
 # PHASE 1: The Freeze Phase
 # ---------------------------------------------------------------------
